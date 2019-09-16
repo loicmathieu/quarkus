@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.json.bind.annotation.JsonbTransient;
+import javax.persistence.Query;
 import javax.persistence.Transient;
 
 import io.quarkus.hibernate.orm.panache.runtime.JpaOperations;
@@ -211,6 +212,57 @@ public abstract class PanacheEntityBase {
      */
     @GenerateBridge
     public static <T extends PanacheEntityBase> PanacheQuery<T> find(String query, Sort sort, Parameters params) {
+        throw JpaOperations.implementationInjectionMissing();
+    }
+
+    /**
+     * Find entities using a JPA query, with optional indexed parameters.
+     *
+     * @param query a {@link io.quarkus.hibernate.orm.panache query string}
+     * @param params optional sequence of indexed parameters
+     * @return a new {@link PanacheQuery} instance for the given query
+     * @see #find(String, Sort, Object...)
+     * @see #find(String, Map)
+     * @see #find(String, Parameters)
+     * @see #list(String, Object...)
+     * @see #stream(String, Object...)
+     */
+    @GenerateBridge
+    public static <T extends PanacheEntityBase> PanacheQuery<T> find(Query query, Map<String, Object> params) {
+        throw JpaOperations.implementationInjectionMissing();
+    }
+
+    /**
+     * Find entities using a JPA query, with optional indexed parameters.
+     *
+     * @param query a {@link io.quarkus.hibernate.orm.panache query string}
+     * @param params optional sequence of indexed parameters
+     * @return a new {@link PanacheQuery} instance for the given query
+     * @see #find(String, Sort, Object...)
+     * @see #find(String, Map)
+     * @see #find(String, Parameters)
+     * @see #list(String, Object...)
+     * @see #stream(String, Object...)
+     */
+    @GenerateBridge
+    public static <T extends PanacheEntityBase> PanacheQuery<T> find(Query query, Parameters params) {
+        throw JpaOperations.implementationInjectionMissing();
+    }
+
+    /**
+     * Find entities using a JPA query, with optional indexed parameters.
+     *
+     * @param query a {@link io.quarkus.hibernate.orm.panache query string}
+     * @param params optional sequence of indexed parameters
+     * @return a new {@link PanacheQuery} instance for the given query
+     * @see #find(String, Sort, Object...)
+     * @see #find(String, Map)
+     * @see #find(String, Parameters)
+     * @see #list(String, Object...)
+     * @see #stream(String, Object...)
+     */
+    @GenerateBridge
+    public static <T extends PanacheEntityBase> PanacheQuery<T> find(Query query, Object... params) {
         throw JpaOperations.implementationInjectionMissing();
     }
 

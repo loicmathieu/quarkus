@@ -232,6 +232,24 @@ public class JpaOperations {
         return find(entityClass, query, sort, params.map());
     }
 
+    public static PanacheQuery<?> find(Class<?> entityClass, Query query, Object... params) {
+        EntityManager em = getEntityManager();
+        bindParameters(query, params);
+        // FIXME issue with how the count is done on a query!
+        return new PanacheQueryImpl(em, query, null, params);
+    }
+
+    public static PanacheQuery<?> find(Class<?> entityClass, Query query, Map<String, Object> params) {
+        EntityManager em = getEntityManager();
+        bindParameters(query, params);
+        // FIXME issue with how the count is done on a query!
+        return new PanacheQueryImpl(em, query, null, params);
+    }
+
+    public static PanacheQuery<?> find(Class<?> entityClass, Query query, Parameters params) {
+        return find(entityClass, query, params.map());
+    }
+
     public static List<?> list(Class<?> entityClass, String query, Object... params) {
         return find(entityClass, query, params).list();
     }
