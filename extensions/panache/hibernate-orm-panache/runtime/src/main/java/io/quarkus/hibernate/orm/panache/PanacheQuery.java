@@ -117,6 +117,8 @@ public interface PanacheQuery<Entity> {
 
     public <T extends Entity> PanacheQuery<T> withLock(LockModeType lockModeType);
 
+    public <T extends Entity> PanacheQuery<T> withHint(String hintName, Object value);
+
     // Results
 
     /**

@@ -97,6 +97,14 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
         jpaQuery.setLockMode(lockModeType);
         return (PanacheQuery<T>) this;
     }
+
+    @Override
+    public <T extends Entity> PanacheQuery<T> withHint(String hintName, Object value) {
+        // TODO maybe enfore that this method should be used before calling the first page
+        jpaQuery.setHint(hintName, value);
+        return (PanacheQuery<T>) this;
+    }
+
     // Results
 
     @Override
