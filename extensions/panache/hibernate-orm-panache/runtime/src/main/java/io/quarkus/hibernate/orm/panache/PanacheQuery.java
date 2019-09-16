@@ -3,6 +3,7 @@ package io.quarkus.hibernate.orm.panache;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
@@ -113,6 +114,8 @@ public interface PanacheQuery<Entity> {
      * @see #page(int,int)
      */
     public Page page();
+
+    public <T extends Entity> PanacheQuery<T> withLock(LockModeType lockModeType);
 
     // Results
 
