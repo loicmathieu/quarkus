@@ -267,6 +267,23 @@ public abstract class PanacheEntityBase {
     }
 
     /**
+     * Find entities using a JPA query, with optional indexed parameters.
+     *
+     * @param query a {@link io.quarkus.hibernate.orm.panache query string}
+     * @param params optional sequence of indexed parameters
+     * @return a new {@link PanacheQuery} instance for the given query
+     * @see #find(String, Sort, Object...)
+     * @see #find(String, Map)
+     * @see #find(String, Parameters)
+     * @see #list(String, Object...)
+     * @see #stream(String, Object...)
+     */
+    @GenerateBridge
+    public static <T extends PanacheEntityBase> PanacheQuery<T> findByExample(Example example) {
+        throw JpaOperations.implementationInjectionMissing();
+    }
+
+    /**
      * Find all entities of this type.
      *
      * @return a new {@link PanacheQuery} instance to find all entities of this type.

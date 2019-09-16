@@ -1,5 +1,12 @@
 package io.quarkus.hibernate.orm.panache.runtime;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +19,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.hibernate.orm.panache.Example;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
@@ -109,6 +117,42 @@ public class JpaOperations {
     private static String getEntityName(Class<?> entityClass) {
         // FIXME: not true?
         return entityClass.getName();
+    }
+
+    private static Map<String, Object> extractQueryParameters(Class<?> entityClass, Example example) {
+        Map<String, Object> params = new HashMap<>();
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(example.getClazz());
+            // pulling all values from getters: they always exist as we generates them
+            for (MethodDescriptor md : beanInfo.getMethodDescriptors()){
+                if(md.getMethod().getName().startsWith("get")){
+                    String property = md.getMethod().getName().substring(3).toLowerCase();
+                    Object value = md.getMethod().invoke(example);
+                    if(value != null){
+                        params.put(property, value);
+                    }
+                }
+            }
+            return params;
+        } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static String createFindQuery(Class<?> entityClass, Collection<String> paramNames){
+        StringBuilder builder = new StringBuilder("FROM ").append(getEntityName(entityClass));
+        boolean first = false;
+        for(String paramName : paramNames){
+            if(!first){
+                builder.append(" AND ");
+            }
+            else {
+                first = true;
+            }
+            builder.append(paramName).append(" = :").append(paramName);
+        }
+        return builder.toString();
     }
 
     private static String createFindQuery(Class<?> entityClass, String query, int paramCount) {
@@ -248,6 +292,16 @@ public class JpaOperations {
 
     public static PanacheQuery<?> find(Class<?> entityClass, Query query, Parameters params) {
         return find(entityClass, query, params.map());
+    }
+
+    public static PanacheQuery<?> find(Class<?> entityClass, Example example) {
+        Map<String, Object> params = extractQueryParameters(entityClass, example);
+        String findQuery = createFindQuery(entityClass, params.keySet());
+        EntityManager em = getEntityManager();
+        // FIXME: sort
+        Query jpaQuery = em.createQuery(findQuery);
+        bindParameters(jpaQuery, params);
+        return new PanacheQueryImpl(em, jpaQuery, findQuery, params);
     }
 
     public static List<?> list(Class<?> entityClass, String query, Object... params) {
