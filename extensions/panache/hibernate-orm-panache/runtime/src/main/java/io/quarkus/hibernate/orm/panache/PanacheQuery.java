@@ -115,6 +115,16 @@ public interface PanacheQuery<Entity> {
      */
     public Page page();
 
+    /**
+     * TODO
+     * 
+     * @param startIdx
+     * @param lastIdx
+     * @param <T>
+     * @return
+     */
+    public <T extends Entity> PanacheQuery<T> range(int startIdx, int lastIdx);
+
     public <T extends Entity> PanacheQuery<T> withLock(LockModeType lockModeType);
 
     public <T extends Entity> PanacheQuery<T> withHint(String hintName, Object value);

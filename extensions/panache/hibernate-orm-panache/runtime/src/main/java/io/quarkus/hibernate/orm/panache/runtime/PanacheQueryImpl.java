@@ -92,6 +92,14 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
     }
 
     @Override
+    public <T extends Entity> PanacheQuery<T> range(int startIdx, int lastIdx) {
+        jpaQuery.setFirstResult(startIdx);
+        // we simulate a page of size (lastIdx - startIdx)
+        this.page = Page.ofSize(lastIdx - startIdx);
+        return (PanacheQuery<T>) this;
+    }
+
+    @Override
     public <T extends Entity> PanacheQuery<T> withLock(LockModeType lockModeType) {
         // TODO maybe enfore that this method should be used before calling the first page
         jpaQuery.setLockMode(lockModeType);
