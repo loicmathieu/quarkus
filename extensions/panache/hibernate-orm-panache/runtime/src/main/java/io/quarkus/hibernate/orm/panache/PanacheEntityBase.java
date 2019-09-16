@@ -2,6 +2,7 @@ package io.quarkus.hibernate.orm.panache;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.json.bind.annotation.JsonbTransient;
@@ -96,6 +97,16 @@ public abstract class PanacheEntityBase {
     @GenerateBridge(targetReturnTypeErased = true)
     public static <T extends PanacheEntityBase> T findById(Object id) {
         throw JpaOperations.implementationInjectionMissing();
+    }
+
+    /**
+     * Maybe find an entity of this type by ID.
+     *
+     * @param id the ID of the entity to find.
+     * @return an optional container the entity found, or <code>Optional.empty()</code> if not found.
+     */
+    public static <T extends PanacheEntityBase> Optional<T> maybeFind(Object id) {
+        return Optional.ofNullable(findById(id));
     }
 
     /**
