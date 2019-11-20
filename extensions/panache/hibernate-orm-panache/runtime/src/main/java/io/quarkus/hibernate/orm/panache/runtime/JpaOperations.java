@@ -124,11 +124,11 @@ public class JpaOperations {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(example.getClazz());
             // pulling all values from getters: they always exist as we generates them
-            for (MethodDescriptor md : beanInfo.getMethodDescriptors()){
-                if(md.getMethod().getName().startsWith("get")){
+            for (MethodDescriptor md : beanInfo.getMethodDescriptors()) {
+                if (md.getMethod().getName().startsWith("get")) {
                     String property = md.getMethod().getName().substring(3).toLowerCase();
                     Object value = md.getMethod().invoke(example);
-                    if(value != null){
+                    if (value != null) {
                         params.put(property, value);
                     }
                 }
@@ -140,14 +140,13 @@ public class JpaOperations {
 
     }
 
-    private static String createFindQuery(Class<?> entityClass, Collection<String> paramNames){
+    private static String createFindQuery(Class<?> entityClass, Collection<String> paramNames) {
         StringBuilder builder = new StringBuilder("FROM ").append(getEntityName(entityClass));
         boolean first = false;
-        for(String paramName : paramNames){
-            if(!first){
+        for (String paramName : paramNames) {
+            if (!first) {
                 builder.append(" AND ");
-            }
-            else {
+            } else {
                 first = true;
             }
             builder.append(paramName).append(" = :").append(paramName);

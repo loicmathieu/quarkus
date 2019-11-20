@@ -3,7 +3,7 @@ package io.quarkus.hibernate.orm.panache;
 public class Example<T> {
     private Class<T> clazz;
 
-    public static <T> Example of(Class<T> clazz){
+    public static <T> Example of(Class<T> clazz) {
         Example example = new Example();
         example.setClazz(clazz);
         return example;
