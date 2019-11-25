@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 
+import io.quarkus.hibernate.orm.panache.Findable;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 
@@ -25,6 +26,8 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
     private Page page;
     private Long count;
 
+    private Range range;
+
     PanacheQueryImpl(EntityManager em, javax.persistence.Query jpaQuery, String query, Object paramsArrayOrMap) {
         this.em = em;
         this.jpaQuery = jpaQuery;
@@ -39,7 +42,6 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
     @SuppressWarnings("unchecked")
     public <T extends Entity> PanacheQuery<T> page(Page page) {
         this.page = page;
-        jpaQuery.setFirstResult(page.index * page.size);
         return (PanacheQuery<T>) this;
     }
 
@@ -92,11 +94,9 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
     }
 
     @Override
-    public <T extends Entity> PanacheQuery<T> range(int startIdx, int lastIdx) {
-        jpaQuery.setFirstResult(startIdx);
-        // we simulate a page of size (lastIdx - startIdx)
-        this.page = Page.ofSize(lastIdx - startIdx);
-        return (PanacheQuery<T>) this;
+    public <T extends Entity> Findable<T> range(int startIdx, int lastIdx) {
+        this.range = Range.of(startIdx, lastIdx);
+        return (Findable<T>) this;
     }
 
     @Override
@@ -137,28 +137,67 @@ public class PanacheQueryImpl<Entity> implements PanacheQuery<Entity> {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Entity> List<T> list() {
-        jpaQuery.setMaxResults(page.size);
+        manageOffsets();
         return jpaQuery.getResultList();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Entity> Stream<T> stream() {
-        jpaQuery.setMaxResults(page.size);
+        manageOffsets();
         return jpaQuery.getResultStream();
     }
 
+
+
     @Override
     public <T extends Entity> T firstResult() {
+        manageOffsets(1);
         List<T> list = list();
-        jpaQuery.setMaxResults(1);
         return list.isEmpty() ? null : list.get(0);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Entity> T singleResult() {
-        jpaQuery.setMaxResults(page.size);
+        manageOffsets(page.size);
         return (T) jpaQuery.getSingleResult();
+    }
+
+    private void manageOffsets() {
+        if(range != null){
+            jpaQuery.setFirstResult(range.startIdx);
+            jpaQuery.setMaxResults(range.lastIdx - range.startIdx);
+        }
+        else {
+            jpaQuery.setFirstResult(page.index * page.size);
+            jpaQuery.setMaxResults(page.size);
+        }
+    }
+
+    private void manageOffsets(int maxResults) {
+        if(range != null){
+            jpaQuery.setFirstResult(range.startIdx);
+            jpaQuery.setMaxResults(maxResults);
+        }
+        else {
+            jpaQuery.setFirstResult(page.index * page.size);
+            jpaQuery.setMaxResults(maxResults);
+        }
+    }
+
+
+    private static class Range {
+        private int startIdx;
+        private int lastIdx;
+
+        private Range(int startIdx, int lastIdx){
+            this.startIdx = startIdx;
+            this.lastIdx = lastIdx;
+        }
+
+        private static Range of(int startIdx, int lastIdx){
+            return new Range(startIdx, lastIdx);
+        }
     }
 }
