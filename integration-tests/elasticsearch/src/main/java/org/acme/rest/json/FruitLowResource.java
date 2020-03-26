@@ -25,10 +25,10 @@ import org.elasticsearch.client.RestClient;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-@Path("/fruits")
+@Path("/fruits/low")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class FruitResource {
+public class FruitLowResource {
     @Inject
     RestClient restClient;
 
@@ -84,7 +84,6 @@ public class FruitResource {
         request.setJsonEntity(query.toString());
         org.elasticsearch.client.Response response = restClient.performRequest(request);
         String responseBody = EntityUtils.toString(response.getEntity());
-        System.out.println(responseBody);
 
         JsonObject json = new JsonObject(responseBody);
         JsonArray hits = json.getJsonObject("hits").getJsonArray("hits");

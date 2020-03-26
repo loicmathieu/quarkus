@@ -17,7 +17,16 @@ public class FruitResourceTest {
     };
 
     @Test
-    public void testHelloEndpoint() {
+    public void testLowLevelRestClient() throws InterruptedException {
+        testEndpoint("/fruits/low");
+    }
+
+    @Test
+    public void testHighLevelRestClient() throws InterruptedException {
+        testEndpoint("/fruits/high");
+    }
+
+    private void testEndpoint(String baseUrl) throws InterruptedException {
         // create a Fruit
         Fruit fruit = new Fruit();
         fruit.id = "1";
@@ -26,19 +35,22 @@ public class FruitResourceTest {
         given()
                 .contentType("application/json")
                 .body(fruit)
-                .when().post("/fruits")
+                .when().post(baseUrl)
                 .then()
                 .statusCode(201);
 
         // get the Fruit
-        Fruit result = get("/fruits/1").as(Fruit.class);
+        Fruit result = get(baseUrl + "/1").as(Fruit.class);
         Assertions.assertNotNull(result);
         Assertions.assertEquals("1", result.id);
         Assertions.assertEquals("Apple", result.name);
         Assertions.assertEquals("Green", result.color);
 
+        // add some time for Elasticsearch to index the document
+        Thread.sleep(50);
+
         // search the Fruit
-        List<Fruit> results = get("/fruits/search?color=Green").as(LIST_OF_FRUIT_TYPE_REF);
+        List<Fruit> results = get(baseUrl + "/search?color=Green").as(LIST_OF_FRUIT_TYPE_REF);
         Assertions.assertNotNull(results);
         Assertions.assertFalse(results.isEmpty());
         Assertions.assertEquals("1", results.get(0).id);

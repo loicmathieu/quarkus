@@ -6,19 +6,29 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 
 @ApplicationScoped
 public class ElasticsearchRestClientProducer {
-    private volatile RestClient client;
+    private volatile RestClient restClient;
+    private volatile RestHighLevelClient highLevelRestClient;
 
-    void initialize(RestClient client) {
-        this.client = client;
+    void initialize(RestClient restClient, RestHighLevelClient highLevelRestClient) {
+        this.restClient = restClient;
+        this.highLevelRestClient = highLevelRestClient;
     }
 
     @Produces
     @Dependent
     @Default
     public RestClient restClient() {
-        return this.client;
+        return this.restClient;
+    }
+
+    @Produces
+    @Dependent
+    @Default
+    public RestHighLevelClient highLevelRestClient() {
+        return this.highLevelRestClient;
     }
 }
