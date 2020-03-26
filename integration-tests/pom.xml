@@ -102,6 +102,7 @@
         <module>qute</module>
         <module>bootstrap-config</module>
         <module>injectmock</module>
+        <module>elasticsearch</module>
     </modules>
 
     <build>

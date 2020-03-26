@@ -18,6 +18,7 @@
         <module>hibernate-orm-panache</module>
         <module>mongodb-panache</module>
         <module>panacheql</module>
+        <module>elasticsearch-panache</module>
     </modules>
 
 
