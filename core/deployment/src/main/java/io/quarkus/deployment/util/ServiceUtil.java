@@ -26,7 +26,7 @@ public final class ServiceUtil {
             throws IOException, ClassNotFoundException {
         final ArrayList<Class<?>> list = new ArrayList<>();
         for (String className : classNamesNamedIn(classLoader, fileName)) {
-            list.add(Class.forName(className, true, classLoader));
+            list.add(Class.forName(className, false, classLoader));
         }
         return Collections.unmodifiableList(list);
     }
