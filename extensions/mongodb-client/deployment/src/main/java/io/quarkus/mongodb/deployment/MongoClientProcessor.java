@@ -51,7 +51,6 @@ import io.quarkus.deployment.builditem.SslNativeConfigBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.deployment.metrics.MetricsCapabilityBuildItem;
 import io.quarkus.mongodb.MongoClientName;
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.mongodb.runtime.MongoClientBeanUtil;
 import io.quarkus.mongodb.runtime.MongoClientRecorder;
 import io.quarkus.mongodb.runtime.MongoClientSupport;
@@ -65,7 +64,6 @@ public class MongoClientProcessor {
     private static final DotName MONGO_CLIENT_ANNOTATION = DotName.createSimple(MongoClientName.class.getName());
 
     private static final DotName MONGO_CLIENT = DotName.createSimple(MongoClient.class.getName());
-    private static final DotName REACTIVE_MONGO_CLIENT = DotName.createSimple(ReactiveMongoClient.class.getName());
 
     @BuildStep
     CodecProviderBuildItem collectCodecProviders(CombinedIndexBuildItem indexBuildItem) {
@@ -224,22 +222,18 @@ public class MongoClientProcessor {
         boolean makeUnremovable = !mongoUnremovableClientsBuildItem.isEmpty();
 
         boolean createDefaultBlockingMongoClient = false;
-        boolean createDefaultReactiveMongoClient = false;
         if (makeUnremovable || mongoClientBuildTimeConfig.forceDefaultClients) {
             // all clients are expected to exist in this case
             createDefaultBlockingMongoClient = true;
-            createDefaultReactiveMongoClient = true;
         } else {
             // we only create the default client if they are actually used by injection points
             for (InjectionPointInfo injectionPoint : registrationPhase.getContext().get(BuildExtension.Key.INJECTION_POINTS)) {
                 DotName injectionPointType = injectionPoint.getRequiredType().name();
                 if (injectionPointType.equals(MONGO_CLIENT) && injectionPoint.hasDefaultedQualifier()) {
                     createDefaultBlockingMongoClient = true;
-                } else if (injectionPointType.equals(REACTIVE_MONGO_CLIENT) && injectionPoint.hasDefaultedQualifier()) {
-                    createDefaultReactiveMongoClient = true;
                 }
 
-                if (createDefaultBlockingMongoClient && createDefaultReactiveMongoClient) {
+                if (createDefaultBlockingMongoClient) {
                     break;
                 }
             }
@@ -250,20 +244,11 @@ public class MongoClientProcessor {
                     makeUnremovable || mongoClientBuildTimeConfig.forceDefaultClients,
                     MongoClientBeanUtil.DEFAULT_MONGOCLIENT_NAME, false));
         }
-        if (createDefaultReactiveMongoClient) {
-            syntheticBeanBuildItemBuildProducer.produce(createReactiveSyntheticBean(recorder, mongodbConfig,
-                    makeUnremovable || mongoClientBuildTimeConfig.forceDefaultClients,
-                    MongoClientBeanUtil.DEFAULT_MONGOCLIENT_NAME, false));
-        }
 
         for (MongoClientNameBuildItem mongoClientName : mongoClientNames) {
             // named blocking client
             syntheticBeanBuildItemBuildProducer
                     .produce(createBlockingSyntheticBean(recorder, mongodbConfig, makeUnremovable, mongoClientName.getName(),
-                            mongoClientName.isAddQualifier()));
-            // named reactive client
-            syntheticBeanBuildItemBuildProducer
-                    .produce(createReactiveSyntheticBean(recorder, mongodbConfig, makeUnremovable, mongoClientName.getName(),
                             mongoClientName.isAddQualifier()));
         }
     }
@@ -280,20 +265,6 @@ public class MongoClientProcessor {
                 .setRuntimeInit();
 
         return applyCommonBeanConfig(makeUnremovable, clientName, addMongoClientQualifier, configurator, false);
-    }
-
-    private SyntheticBeanBuildItem createReactiveSyntheticBean(MongoClientRecorder recorder, MongodbConfig mongodbConfig,
-            boolean makeUnremovable, String clientName, boolean addMongoClientQualifier) {
-
-        SyntheticBeanBuildItem.ExtendedBeanConfigurator configurator = SyntheticBeanBuildItem
-                .configure(ReactiveMongoClient.class)
-                .scope(ApplicationScoped.class)
-                // pass the runtime config into the recorder to ensure that the DataSource related beans
-                // are created after runtime configuration has been setup
-                .supplier(recorder.reactiveMongoClientSupplier(clientName, mongodbConfig))
-                .setRuntimeInit();
-
-        return applyCommonBeanConfig(makeUnremovable, clientName, addMongoClientQualifier, configurator, true);
     }
 
     private SyntheticBeanBuildItem applyCommonBeanConfig(boolean makeUnremovable, String clientName,
@@ -329,7 +300,7 @@ public class MongoClientProcessor {
         List<MongoClientBuildItem> result = new ArrayList<>(mongoConnections.size());
         for (MongoConnectionNameBuildItem mongoConnection : mongoConnections) {
             String name = mongoConnection.getName();
-            result.add(new MongoClientBuildItem(recorder.getClient(name), recorder.getReactiveClient(name), name));
+            result.add(new MongoClientBuildItem(recorder.getClient(name), name));
         }
         return result;
     }

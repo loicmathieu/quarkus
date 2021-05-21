@@ -14,7 +14,6 @@ import com.mongodb.event.ConnectionPoolListener;
 import io.quarkus.arc.Arc;
 import io.quarkus.mongodb.metrics.MicrometerConnectionPoolListener;
 import io.quarkus.mongodb.metrics.MongoMetricsConnectionPoolListener;
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.runtime.RuntimeValue;
 import io.quarkus.runtime.annotations.Recorder;
 
@@ -51,27 +50,8 @@ public class MongoClientRecorder {
         };
     }
 
-    public Supplier<ReactiveMongoClient> reactiveMongoClientSupplier(String clientName,
-            @SuppressWarnings("unused") MongodbConfig mongodbConfig) {
-        ReactiveMongoClient reactiveMongoClient = Arc.container().instance(MongoClients.class).get()
-                .createReactiveMongoClient(clientName);
-        return new Supplier<ReactiveMongoClient>() {
-            @Override
-            public ReactiveMongoClient get() {
-                return reactiveMongoClient;
-            }
-        };
-    }
-
     public RuntimeValue<MongoClient> getClient(String name) {
         return new RuntimeValue<>(Arc.container().instance(MongoClient.class, literal(name)).get());
-    }
-
-    public RuntimeValue<ReactiveMongoClient> getReactiveClient(String name) {
-        return new RuntimeValue<>(
-                Arc.container()
-                        .instance(ReactiveMongoClient.class, literal(name + MongoClientBeanUtil.REACTIVE_CLIENT_NAME_SUFFIX))
-                        .get());
     }
 
     @SuppressWarnings("rawtypes")

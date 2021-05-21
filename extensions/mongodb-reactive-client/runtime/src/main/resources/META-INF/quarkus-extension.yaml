@@ -1,0 +1,14 @@
+---
+artifact: ${project.groupId}:${project.artifactId}:${project.version}
+name: "MongoDB reactive client"
+metadata:
+  keywords:
+  - "mongo"
+  - "mongodb"
+  - "nosql"
+  - "datastore"
+  - "reactive"
+  guide: "https://quarkus.io/guides/mongodb"
+  categories:
+  - "data"
+  status: "stable"

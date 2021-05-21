@@ -53,8 +53,6 @@ import com.mongodb.event.ConnectionPoolListener;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.InstanceHandle;
 import io.quarkus.mongodb.health.MongoHealthCheck;
-import io.quarkus.mongodb.impl.ReactiveMongoClientImpl;
-import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 
 /**
  * This class is sort of a producer for {@link MongoClient} and {@link ReactiveMongoClient}.
@@ -75,7 +73,6 @@ public class MongoClients {
     private final MongoClientSupport mongoClientSupport;
 
     private Map<String, MongoClient> mongoclients = new HashMap<>();
-    private Map<String, ReactiveMongoClient> reactiveMongoClients = new HashMap<>();
 
     public MongoClients(MongodbConfig mongodbConfig, MongoClientSupport mongoClientSupport) {
         this.mongodbConfig = mongodbConfig;
@@ -106,16 +103,6 @@ public class MongoClients {
         MongoClient client = com.mongodb.client.MongoClients.create(mongoConfiguration);
         mongoclients.put(clientName, client);
         return client;
-    }
-
-    public ReactiveMongoClient createReactiveMongoClient(String clientName)
-            throws MongoException {
-        MongoClientSettings mongoConfiguration = createMongoConfiguration(getMatchingMongoClientConfig(clientName));
-        com.mongodb.reactivestreams.client.MongoClient client = com.mongodb.reactivestreams.client.MongoClients
-                .create(mongoConfiguration);
-        ReactiveMongoClientImpl reactive = new ReactiveMongoClientImpl(client);
-        reactiveMongoClients.put(clientName, reactive);
-        return reactive;
     }
 
     public MongoClientConfig getMatchingMongoClientConfig(String clientName) {
@@ -456,11 +443,6 @@ public class MongoClients {
         for (MongoClient client : mongoclients.values()) {
             if (client != null) {
                 client.close();
-            }
-        }
-        for (ReactiveMongoClient reactive : reactiveMongoClients.values()) {
-            if (reactive != null) {
-                reactive.close();
             }
         }
     }
