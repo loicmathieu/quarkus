@@ -497,6 +497,7 @@
                                             <exclude>org.springframework.boot:spring-boot</exclude>
                                             <!-- Ban checker-qual, we don't use Checker Framework -->
                                             <exclude>org.checkerframework:checker-qual</exclude>
+                                            <exclude>org.checkerframework:checker-compat-qual</exclude>
                                             <!-- We use our own impl here, including this one causes problems-->
                                             <exclude>org.jboss.resteasy:resteasy-context-propagation</exclude>
                                             <exclude>com.google.android:annotations</exclude>
