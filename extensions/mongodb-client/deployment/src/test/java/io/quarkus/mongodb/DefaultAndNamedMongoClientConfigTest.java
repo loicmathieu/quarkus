@@ -25,7 +25,6 @@ public class DefaultAndNamedMongoClientConfigTest extends MongoWithReplicasTestB
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
-            .withApplicationRoot((jar) -> jar.addClasses(MongoTestBase.class))
             .withConfigurationResource("application-default-and-named-mongoclient.properties");
 
     @Inject

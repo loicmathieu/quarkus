@@ -1,6 +1,5 @@
 package io.quarkus.mongodb;
 
-import static io.quarkus.mongodb.MongoTestBase.getConfiguredConnectionString;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
@@ -194,4 +193,19 @@ public class MongoWithReplicasTestBase {
         return builder.build();
     }
 
+    protected static String getConfiguredConnectionString() {
+        return getProperty("connection_string");
+    }
+
+    protected static String getProperty(String name) {
+        String s = System.getProperty(name);
+        if (s != null) {
+            s = s.trim();
+            if (s.length() > 0) {
+                return s;
+            }
+        }
+
+        return null;
+    }
 }

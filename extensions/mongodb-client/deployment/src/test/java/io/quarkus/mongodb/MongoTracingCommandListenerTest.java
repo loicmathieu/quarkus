@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.inject.Inject;
 
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,21 +18,22 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import io.quarkus.mongodb.tracing.MongoTracingCommandListener;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoTestResource;
 
 /**
  * Test the inclusion and config of the {@link MongoTracingCommandListener}.
  * 
  * @see io.quarkus.smallrye.opentracing.deployment.TracingTest
  */
-public class MongoTracingCommandListenerTest extends MongoTestBase {
+@QuarkusTestResource(MongoTestResource.class)
+public class MongoTracingCommandListenerTest {
 
     @Inject
     MongoClient client;
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
-            .setArchiveProducer(
-                    () -> ShrinkWrap.create(JavaArchive.class).addClasses(MongoTestBase.class))
             .withConfigurationResource("application-tracing-mongo.properties");
 
     static MockTracer mockTracer = new MockTracer();

@@ -22,12 +22,14 @@ import io.quarkus.mongodb.deployment.MongoClientBuildItem;
 import io.quarkus.mongodb.deployment.MongoClientNameBuildItem;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoTestResource;
 
+@QuarkusTestResource(MongoTestResource.class)
 public class MongoNamedClientClientBuildItemConsumerTest {
 
     @RegisterExtension
     static QuarkusUnitTest runner = new QuarkusUnitTest()
-            .withApplicationRoot((jar) -> jar.addClasses(MongoTestBase.class))
             .withConfigurationResource("named-mongoclient.properties")
             .addBuildChainCustomizer(buildCustomizer());
 

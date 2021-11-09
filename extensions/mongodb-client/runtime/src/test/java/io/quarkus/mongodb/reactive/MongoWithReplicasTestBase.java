@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import de.flapdoodle.embed.mongo.Command;
+import de.flapdoodle.embed.mongo.config.*;
+import de.flapdoodle.embed.process.store.ArtifactStore;
 import org.bson.Document;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.AfterAll;
@@ -20,7 +23,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
-import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.Defaults;

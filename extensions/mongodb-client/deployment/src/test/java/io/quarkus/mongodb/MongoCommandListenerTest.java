@@ -17,8 +17,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.mongodb.client.MongoClient;
 
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoTestResource;
 
-public class MongoCommandListenerTest extends MongoTestBase {
+@QuarkusTestResource(MongoTestResource.class)
+public class MongoCommandListenerTest {
 
     @Inject
     MongoClient client;
@@ -26,7 +29,7 @@ public class MongoCommandListenerTest extends MongoTestBase {
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
             .setArchiveProducer(
-                    () -> ShrinkWrap.create(JavaArchive.class).addClasses(MongoTestBase.class, MockCommandListener.class))
+                    () -> ShrinkWrap.create(JavaArchive.class).addClasses(MockCommandListener.class))
             .withConfigurationResource("default-mongoclient.properties");
 
     @AfterEach

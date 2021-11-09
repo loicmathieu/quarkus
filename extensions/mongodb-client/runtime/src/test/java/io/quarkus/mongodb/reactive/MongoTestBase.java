@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import de.flapdoodle.embed.mongo.Command;
+import de.flapdoodle.embed.mongo.config.ArtifactStores;
+import de.flapdoodle.embed.mongo.config.Defaults;
+import de.flapdoodle.embed.process.store.ArtifactStore;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jboss.logging.Logger;
@@ -16,7 +20,6 @@ import org.junit.jupiter.api.BeforeAll;
 
 import com.mongodb.client.result.InsertOneResult;
 
-import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.Defaults;

@@ -20,8 +20,11 @@ import io.quarkus.arc.Arc;
 import io.quarkus.mongodb.metrics.ConnectionPoolGauge;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoTestResource;
 
-public class MongoMetricsTest extends MongoTestBase {
+@QuarkusTestResource(MongoTestResource.class)
+public class MongoMetricsTest {
 
     @Inject
     MongoClient client;
@@ -32,7 +35,6 @@ public class MongoMetricsTest extends MongoTestBase {
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
-            .withApplicationRoot((jar) -> jar.addClasses(MongoTestBase.class))
             .withConfigurationResource("application-metrics-mongo.properties");
 
     @AfterEach
@@ -76,7 +78,7 @@ public class MongoMetricsTest extends MongoTestBase {
     private Tag[] getTags() {
         return new Tag[] {
                 new Tag("host", "127.0.0.1"),
-                new Tag("port", "27018"),
+                new Tag("port", "27017"),
         };
     }
 }

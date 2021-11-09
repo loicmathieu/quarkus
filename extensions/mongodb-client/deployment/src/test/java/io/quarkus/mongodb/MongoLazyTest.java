@@ -18,9 +18,12 @@ import io.quarkus.arc.Arc;
 import io.quarkus.mongodb.metrics.ConnectionPoolGauge;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoTestResource;
 
 /** Variation of {@link io.quarkus.mongodb.MongoMetricsTest} to verify lazy client initialization. */
-public class MongoLazyTest extends MongoTestBase {
+@QuarkusTestResource(MongoTestResource.class)
+public class MongoLazyTest {
 
     @Inject
     @RegistryType(type = MetricRegistry.Type.VENDOR)
@@ -28,7 +31,6 @@ public class MongoLazyTest extends MongoTestBase {
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
-            .withApplicationRoot((jar) -> jar.addClasses(MongoTestBase.class))
             .withConfigurationResource("application-metrics-mongo.properties");
 
     @Test
@@ -55,7 +57,7 @@ public class MongoLazyTest extends MongoTestBase {
     private Tag[] getTags() {
         return new Tag[] {
                 new Tag("host", "127.0.0.1"),
-                new Tag("port", "27018"),
+                new Tag("port", "27017"),
         };
     }
 }
