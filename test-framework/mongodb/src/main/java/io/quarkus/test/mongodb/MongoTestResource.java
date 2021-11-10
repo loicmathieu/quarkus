@@ -15,7 +15,6 @@ import de.flapdoodle.embed.mongo.config.MongodConfig;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.RuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.runtime.Network;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
@@ -79,7 +78,7 @@ public class MongoTestResource implements QuarkusTestResourceLifecycleManager {
 
     private MongodExecutable doGetExecutable(MongodConfig config) {
         RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(Command.MongoD)
-                .processOutput(ProcessOutput.silent())
+                //                .processOutput(ProcessOutput.silent())
                 .build();
         return MongodStarter.getInstance(runtimeConfig).prepare(config);
     }
@@ -87,7 +86,16 @@ public class MongoTestResource implements QuarkusTestResourceLifecycleManager {
     @Override
     public void stop() {
         if (MONGO != null) {
-            MONGO.stop();
+            try {
+                MONGO.stop();
+            } catch (Exception e) {
+                // Try again to stop it
+                try {
+                    MONGO.stop();
+                } catch (Exception e2) {
+                    LOGGER.error("Unable to stop MongoDB", e);
+                }
+            }
         }
     }
 }

@@ -21,10 +21,13 @@ import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.*;
+import de.flapdoodle.embed.mongo.config.Defaults;
+import de.flapdoodle.embed.mongo.config.ImmutableMongodConfig;
+import de.flapdoodle.embed.mongo.config.MongoCmdOptions;
+import de.flapdoodle.embed.mongo.config.MongodConfig;
+import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.RuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.runtime.Network;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
@@ -42,19 +45,27 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
             Class.forName("sun.net.ext.ExtendedSocketOptions", true, ClassLoader.getSystemClassLoader());
         } catch (ClassNotFoundException e) {
         }
+
         try {
             List<MongodConfig> configs = new ArrayList<>();
             for (int i = 0; i < 2; i++) {
                 int port = 27017 + i;
                 configs.add(buildMongodConfiguration("localhost", port, true));
             }
+            //FIXME if we cannot start one instance, better to crash
             configs.forEach(config -> {
+                System.out.println("!!! Starting Mongo " + config);
                 MongodExecutable exec = getMongodExecutable(config);
                 MONGOS.add(exec);
                 try {
                     exec.start();
                 } catch (IOException e) {
-                    LOGGER.error("Unable to start the mongo instance", e);
+                    LOGGER.error("Unable to start the mongo instance, try stopping it now", e);
+                    try {
+                        exec.stop();
+                    } catch (Exception e2) {
+                        LOGGER.error("Unable to stop MongoDB", e2);
+                    }
                 }
             });
             initializeReplicaSet(configs);
@@ -80,7 +91,7 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
 
     private MongodExecutable doGetExecutable(MongodConfig config) {
         RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(Command.MongoD)
-                .processOutput(ProcessOutput.silent())
+                //                .processOutput(ProcessOutput.silent())
                 .build();
         return MongodStarter.getInstance(runtimeConfig).prepare(config);
     }
@@ -91,7 +102,12 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
             try {
                 mongod.stop();
             } catch (Exception e) {
-                LOGGER.error("Unable to stop MongoDB", e);
+                // Try again to stop it
+                try {
+                    mongod.stop();
+                } catch (Exception e2) {
+                    LOGGER.error("Unable to stop MongoDB", e);
+                }
             }
         });
     }
@@ -164,13 +180,7 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
 
     private static MongodConfig buildMongodConfiguration(String url, int port, final boolean configureReplicaSet)
             throws IOException {
-        try {
-            //JDK bug workaround
-            //https://github.com/quarkusio/quarkus/issues/14424
-            //force class init to prevent possible deadlock when done by mongo threads
-            Class.forName("sun.net.ext.ExtendedSocketOptions", true, ClassLoader.getSystemClassLoader());
-        } catch (ClassNotFoundException e) {
-        }
+        System.out.println("!!! Defining Mongo " + url + ":" + port);
         final ImmutableMongodConfig.Builder builder = MongodConfig.builder()
                 .version(Version.Main.V4_0)
                 .net(new Net(url, port, Network.localhostIsIPv6()));

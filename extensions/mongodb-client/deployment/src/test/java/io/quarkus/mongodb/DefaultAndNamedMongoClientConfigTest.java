@@ -20,8 +20,11 @@ import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.ClientProxyUnwrapper;
 import io.quarkus.mongodb.health.MongoHealthCheck;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoReplicaSetTestResource;
 
-public class DefaultAndNamedMongoClientConfigTest extends MongoWithReplicasTestBase {
+@QuarkusTestResource(MongoReplicaSetTestResource.class)
+public class DefaultAndNamedMongoClientConfigTest {
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()

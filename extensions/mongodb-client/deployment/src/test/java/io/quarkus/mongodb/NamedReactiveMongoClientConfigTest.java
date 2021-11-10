@@ -27,8 +27,11 @@ import io.quarkus.mongodb.health.MongoHealthCheck;
 import io.quarkus.mongodb.impl.ReactiveMongoClientImpl;
 import io.quarkus.mongodb.reactive.ReactiveMongoClient;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.mongodb.MongoReplicaSetTestResource;
 
-public class NamedReactiveMongoClientConfigTest extends MongoWithReplicasTestBase {
+@QuarkusTestResource(MongoReplicaSetTestResource.class)
+public class NamedReactiveMongoClientConfigTest {
 
     @RegisterExtension
     static final QuarkusUnitTest config = new QuarkusUnitTest()
