@@ -1210,6 +1210,10 @@ public class TestEndpoint {
         CatDto catDto = Cat.findAll().project(CatDto.class).firstResult();
         Assertions.assertEquals("Julie", catDto.ownerName);
 
+        CatProjectionBean catProjectionBean = Cat.find("select c.name, c.owner.name as ownerName from Cat c")
+                .project(CatProjectionBean.class).firstResult();
+        Assertions.assertEquals("Julie", catProjectionBean.getOwnerName());
+
         Cat.deleteAll();
         CatOwner.deleteAll();
 

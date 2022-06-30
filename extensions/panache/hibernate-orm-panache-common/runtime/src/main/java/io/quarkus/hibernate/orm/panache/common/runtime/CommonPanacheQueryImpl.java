@@ -82,6 +82,10 @@ public class CommonPanacheQueryImpl<Entity> {
             throw new PanacheQueryException("Unable to perform a projection on a named query");
         }
 
+        if (query.startsWith("select") || query.startsWith("SELECT")) {
+            return new CommonPanacheQueryImpl<>(this, query, "select count(*) " + query);
+        }
+
         // We use the first constructor that we found and use the parameter names,
         // so the projection class must have only one constructor,
         // and the application must be built with parameter names.
