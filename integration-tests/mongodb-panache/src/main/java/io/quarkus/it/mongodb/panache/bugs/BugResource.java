@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -146,6 +147,32 @@ public class BugResource {
         Bug23813ReactiveEntity findBug23813ReactiveEntity = reactiveCollection
                 .find(new Document("_id", bug23813ReactiveEntity.id)).first();
         if (findBug23813ReactiveEntity == null) {
+            return Response.status(404).build();
+        }
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("19840")
+    public Response testCustomBsonId() {
+        Bug19840ImperativeEntity bug19840ImperativeEntity = new Bug19840ImperativeEntity();
+        bug19840ImperativeEntity.customId = "customId";
+        bug19840ImperativeEntity.anOtherField = "an other field";
+        bug19840ImperativeEntity.persist();
+        Optional<Bug19840ImperativeEntity> imperativeEntity = Bug19840ImperativeEntity
+                .find("customId in ?1", List.of("customId")).firstResultOptional();
+        if (imperativeEntity.isEmpty()) {
+            return Response.status(404).build();
+        }
+
+        Bug19840ReactiveEntity bug19840ReactiveEntity = new Bug19840ReactiveEntity();
+        bug19840ReactiveEntity.customId = "customId";
+        bug19840ReactiveEntity.anOtherField = "an other field";
+        bug19840ReactiveEntity.persist();
+        Optional<Bug19840ReactiveEntity> reactiveEntity = Bug19840ReactiveEntity.find("customId in ?1", List.of("customId"))
+                .firstResultOptional();
+        if (reactiveEntity.isEmpty()) {
             return Response.status(404).build();
         }
 

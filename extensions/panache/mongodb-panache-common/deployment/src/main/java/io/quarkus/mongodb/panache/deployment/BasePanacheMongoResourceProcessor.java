@@ -164,15 +164,24 @@ public abstract class BasePanacheMongoResourceProcessor {
 
     private void extractMappings(Map<String, String> classPropertyMapping, ClassInfo target, CombinedIndexBuildItem index) {
         for (FieldInfo fieldInfo : target.fields()) {
+            System.out.println("!!! Handling field " + fieldInfo.declaringClass().name() + "." + fieldInfo.name());
             if (fieldInfo.hasAnnotation(BSON_PROPERTY)) {
                 AnnotationInstance bsonProperty = fieldInfo.annotation(BSON_PROPERTY);
+                System.out.println("!!! Add property mapping " + fieldInfo.name() + "->" + bsonProperty.value().asString());
                 classPropertyMapping.put(fieldInfo.name(), bsonProperty.value().asString());
+            }
+            if (fieldInfo.hasAnnotation(BSON_ID)) {
+                System.out.println("!!! Add property mapping " + fieldInfo.name() + "->" + "_id");
+                classPropertyMapping.put(fieldInfo.name(), "_id");
             }
         }
         for (MethodInfo methodInfo : target.methods()) {
             if (methodInfo.hasAnnotation(BSON_PROPERTY)) {
                 AnnotationInstance bsonProperty = methodInfo.annotation(BSON_PROPERTY);
                 classPropertyMapping.put(methodInfo.name(), bsonProperty.value().asString());
+            }
+            if (methodInfo.hasAnnotation(BSON_ID)) {
+                classPropertyMapping.put(methodInfo.name(), "_id");
             }
         }
 
