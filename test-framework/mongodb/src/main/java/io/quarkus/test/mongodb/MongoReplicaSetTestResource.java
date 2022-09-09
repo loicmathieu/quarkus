@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -24,6 +25,7 @@ import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.*;
+import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.RuntimeConfig;
 import de.flapdoodle.embed.process.io.Processors;
@@ -31,9 +33,30 @@ import de.flapdoodle.embed.process.runtime.Network;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycleManager {
-
+    public static final String PORT = "port";
+    public static final String VERSION = "version";
+    private static final int DEFAULT_PORT = 27017;
     private static final Logger LOGGER = Logger.getLogger(MongoReplicaSetTestResource.class);
     private static List<MongodExecutable> MONGOS = new ArrayList<>();
+    private Integer port;
+    private IFeatureAwareVersion version;
+
+    @Override
+    public void init(Map<String, String> initArgs) {
+        port = Optional.ofNullable(initArgs.get(PORT)).map(Integer::parseInt).orElse(DEFAULT_PORT);
+        version = Optional.ofNullable(initArgs.get(VERSION)).map(versionStr -> {
+            try {
+                return Version.valueOf(versionStr);
+            } catch (IllegalArgumentException e) {
+                try {
+                    return Version.Main.valueOf(versionStr);
+                } catch (IllegalArgumentException ex) {
+                    throw new IllegalArgumentException(
+                            String.format("Unable to convert %s to a known Mongo version", versionStr));
+                }
+            }
+        }).orElse(Version.Main.PRODUCTION);
+    }
 
     @Override
     public Map<String, String> start() {
@@ -47,8 +70,8 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
         try {
             List<MongodConfig> configs = new ArrayList<>();
             for (int i = 0; i < 2; i++) {
-                int port = 27017 + i;
-                configs.add(buildMongodConfiguration("localhost", port, true));
+                int instancePort = port + i;
+                configs.add(buildMongodConfiguration("localhost", instancePort, version, true));
             }
             configs.forEach(config -> {
                 MongodExecutable exec = getMongodExecutable(config);
@@ -168,7 +191,8 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
         return true;
     }
 
-    private static MongodConfig buildMongodConfiguration(String url, int port, final boolean configureReplicaSet)
+    private static MongodConfig buildMongodConfiguration(String url, int port, IFeatureAwareVersion version,
+            final boolean configureReplicaSet)
             throws IOException {
         try {
             //JDK bug workaround
@@ -178,7 +202,7 @@ public class MongoReplicaSetTestResource implements QuarkusTestResourceLifecycle
         } catch (ClassNotFoundException e) {
         }
         final ImmutableMongodConfig.Builder builder = MongodConfig.builder()
-                .version(Version.Main.V4_0)
+                .version(version)
                 .net(new Net(url, port, Network.localhostIsIPv6()));
         if (configureReplicaSet) {
             builder.putArgs("--replSet", "test001");

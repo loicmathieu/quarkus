@@ -47,7 +47,7 @@ public class MongoTestResource implements QuarkusTestResourceLifecycleManager {
                             String.format("Unable to convert %s to a known Mongo version", versionStr));
                 }
             }
-        }).orElse(Version.Main.V4_0);
+        }).orElse(Version.Main.PRODUCTION);
     }
 
     @Override
