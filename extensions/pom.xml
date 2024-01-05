@@ -193,6 +193,7 @@
         <!-- Logging -->
         <module>logging-json</module>
         <module>logging-gelf</module>
+        <module>logging-opentelemetry</module>
 
         <!-- Templating -->
         <module>qute</module>
